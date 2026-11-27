@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi habitación a medida</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--tx:#1f2a2e;--mu:#6b777b;--ac:#0f766e;--ln:#e2ded5;--acs:#d9f0ec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14191b;--card:#1d2427;--tx:#eef2f2;--mu:#98a5a8;--ac:#3dc4b5;--ln:#2d383b;--acs:#16403c}}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{display:grid;grid-template-columns:minmax(320px,430px) 1fr;gap:16px;padding:16px;max-width:1280px;margin:auto}
+.panel{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:18px;display:flex;flex-direction:column;min-height:560px}
+h1{font-size:18px;margin:0 0 4px}h2{font-size:17px;margin:14px 0 6px}.mu{color:var(--mu);font-size:13px}
+.dots{display:flex;gap:6px;margin:10px 0 4px}.dots i{flex:1;height:4px;border-radius:2px;background:var(--ln)}.dots i.on{background:var(--ac)}
+.chip{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;color:var(--tx);border:1.5px solid var(--ln);border-radius:12px;padding:10px 12px;margin:6px 0;font:inherit;cursor:pointer}
+.chip.on{border-color:var(--ac);background:var(--acs)}.chip b{font-weight:600}.tag{margin-left:auto;font-size:11px;color:var(--ac);white-space:nowrap}
+.body{flex:1;overflow:auto}.nav{display:flex;gap:8px;margin-top:12px}
+button.p,button.s{flex:1;padding:11px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:1.5px solid var(--ac)}
+button.p{background:var(--ac);color:#fff}button.s{background:transparent;color:var(--ac)}button:disabled{opacity:.4}
+.stage{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--ln);background:#cfd8d6;min-height:560px}
+canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.hud{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}
+.hud span{background:rgba(20,25,27,.78);color:#fff;border-radius:999px;padding:4px 10px;font-size:12px}
+.tools{position:absolute;right:12px;top:12px;display:flex;gap:6px}.tools button{background:rgba(20,25,27,.78);color:#fff;border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:12px;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--ac)}textarea{width:100%;min-height:70px;border-radius:10px;border:1.5px solid var(--ln);background:transparent;color:var(--tx);padding:8px;font:inherit}
+.sum h3{font-size:13px;margin:12px 0 4px;color:var(--ac);text-transform:uppercase;letter-spacing:.04em}.sum li{margin:2px 0}
+@media(max-width:820px){.app{grid-template-columns:1fr}.stage{order:-1;height:46vh;min-height:300px}.panel{min-height:0}}
+body{background:radial-gradient(1200px 600px at 10% -10%,#d9f0ec 0,transparent 60%),radial-gradient(900px 500px at 100% 0,#f3e6d3 0,transparent 55%),var(--bg);min-height:100vh}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) body{background:radial-gradient(1000px 500px at 10% -10%,#16403c 0,transparent 60%),var(--bg)}}
+h1,h2{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.01em}h1{font-size:22px}
+.panel,.stage{box-shadow:0 10px 30px -12px rgba(15,60,55,.25)}
+.chip{transition:.15s}.chip:hover{transform:translateY(-1px);border-color:var(--ac)}
+button.p{background:linear-gradient(135deg,var(--ac),#0b5f58);border:0;box-shadow:0 6px 14px -6px var(--ac)}
+.fld,.grid2 input{width:100%;padding:9px;border-radius:10px;border:1.5px solid var(--ln);background:transparent;color:var(--tx);font:inherit;margin-top:4px}
+.modal{position:fixed;inset:0;background:rgba(10,15,16,.62);display:none;align-items:center;justify-content:center;z-index:50;padding:12px}
+.mbox{background:var(--card);color:var(--tx);border-radius:20px;max-width:1000px;width:100%;max-height:94vh;overflow:hidden;display:grid;grid-template-columns:1fr 370px}
+#sv{min-height:460px;background:linear-gradient(#e6eeed,#b7c8c5)}#sv canvas{display:block}#sc{padding:16px;overflow:auto;max-height:94vh}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sw{display:flex;gap:8px;margin:6px 0}.sw button{width:36px;height:36px;border-radius:50%;border:2px solid var(--ln);cursor:pointer}.sw button.on{outline:3px solid var(--ac);outline-offset:2px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ln);background:transparent;color:var(--tx);border-radius:999px;padding:5px 11px;margin:3px 4px 3px 0;font:inherit;font-size:13px;cursor:pointer}
+.pill.on{border-color:var(--ac);background:var(--acs)}.pill i{width:12px;height:12px;border-radius:50%;border:1px solid #0003}
+.szb{background:var(--acs);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:13px}
+.tut{display:grid;grid-template-columns:110px 1fr;gap:10px}.tut svg{width:100%}.st{padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13px;border:1px solid transparent}.st.on{background:var(--acs);border-color:var(--ac)}.st b{display:block}
+@media(max-width:820px){.mbox{grid-template-columns:1fr;overflow:auto}#sv{min-height:300px}#sc{max-height:none}}
+</style>
+</head>
+<body>
+<div class="app">
+ <section class="panel">
+  <h1>Tu habitación, a tu medida</h1>
+  <div class="mu">Cada respuesta se refleja al instante en el modelo 3D.</div>
+  <div class="dots" id="dots"></div>
+  <div class="body" id="body"></div>
+  <div class="nav"><button class="s" id="bk" onclick="go(-1)">Atrás</button><button class="p" id="nx" onclick="go(1)">Siguiente</button></div>
+ </section>
+ <section class="stage" id="stage">
+  <div class="hud" id="hud"></div>
+  <div class="tools"><button onclick="toggleNight()">🌙 Vista nocturna</button><button onclick="resetCam()">⟲ Vista</button></div>
+ </section>
+</div>
+<div id="suitm" class="modal"><div class="mbox"><div id="sv"></div><div id="sc"></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const PR=[['couple','Pareja','💑'],['kids','Familia con niños pequeños','🧒'],['family','Grupo familiar','👨‍👩‍👧‍👦'],['elder','Adulto mayor (movilidad / confort)','👵'],['recovery','Acompaño a alguien en recuperación','🩹']];
+const OP=[
+{k:'crib',l:'Cuna en la habitación',a:'Housekeeping',p:['kids']},
+{k:'childproof',l:'Protectores de esquinas y enchufes',a:'Mantenimiento',p:['kids']},
+{k:'sofa',l:'Cama o sofá extra para acompañante',a:'Housekeeping',p:['family','recovery']},
+{k:'twin',l:'Camas separadas (en vez de king)',a:'Housekeeping',p:['family','elder']},
+{k:'raised',l:'Cama alta, fácil para levantarse',a:'Mantenimiento',p:['elder','recovery']},
+{k:'rails',l:'Barandal lateral en la cama',a:'Mantenimiento',p:['elder','recovery']},
+{k:'grab',l:'Barras de apoyo y asiento en ducha',a:'Mantenimiento',p:['elder','recovery']},
+{k:'nightlight',l:'Iluminación nocturna hacia el baño',a:'Mantenimiento',p:['elder','kids','recovery']},
+{k:'medical',l:'Espacio libre para equipo médico / silla de ruedas',a:'Operaciones',p:['recovery','elder']},
+{k:'quiet',l:'Ubicación tranquila + paneles acústicos',a:'Recepción',p:['couple','recovery','elder','kids']},
+{k:'pillows',l:'Almohadas especiales / extra',a:'Housekeeping',p:['recovery','elder']}];
+const S={step:0,occ:new Set(),bm:0,bf:'Continental',bft:'07:00',rent:false,name:'',hwa:'525500000000',pf:new Set(),man:{},temp:22,night:false,notes:''};
+const on=o=>o.k in S.man?S.man[o.k]:o.p.some(p=>S.pf.has(p));
+const sug=o=>o.p.some(p=>S.pf.has(p));
+const chip=(f,on,t,x)=>`<button class="chip ${on?'on':''}" onclick="${f}">${t}${x||''}</button>`;
+function ui(){
+ const b=document.getElementById('body');let h='';const cs=SP()[S.step]||'occ';
+ if(cs=='occ')h=OCH();if(0)h='<h2>¿Quién viaja?</h2><div class="mu">Elige todas las que apliquen.</div>'+PR.map(p=>chip(`tp('${p[0]}')`,S.pf.has(p[0]),`<span>${p[2]}</span><b>${p[1]}</b>`)).join('');
+ if(cs=='opt'){const V=OP.filter(o=>!o.g&&!o.h),a=V.filter(sug),r=V.filter(o=>!sug(o)&&!o.r),rr=V.filter(o=>!sug(o)&&o.r),f=o=>chip(`to('${o.k}')`,on(o),`<b>${o.l}</b>`,sug(o)?'<span class="tag">Sugerido</span>':o.r?'<span class="tag" style="color:var(--mu)">Poco común</span>':'');
+  h='<h2>Adaptaciones</h2><div class="mu">Pre-seleccionadas según tu perfil; ajusta lo que quieras.</div>'+(a.length?'<h2 style="font-size:13px" class="mu">Sugeridas para ti</h2>'+a.map(f).join(''):'')+'<h2 style="font-size:13px" class="mu">Más comunes</h2>'+r.map(f).join('')+'<details><summary class="mu" style="cursor:pointer;margin:10px 0">Poco comunes ('+rr.length+')</summary>'+rr.map(f).join('')+'</details>'}
+ if(cs=='conf')h=`<h2>Confort</h2><label>Temperatura al llegar: <b id="tv">${S.temp}°C</b></label><input type="range" min="18" max="26" value="${S.temp}" oninput="S.temp=+this.value;document.getElementById('tv').textContent=S.temp+'°C';hud();tint()"><h2>Algo más que debamos saber</h2><textarea placeholder="Alergias, horarios de medicación, preferencias…" onchange="S.notes=this.value">${S.notes}</textarea>`;
+ if(cs=='bed')h=BEDH();if(cs=='amen')h=AMH();if(cs=='conf')h+=BFH();if(cs=='biz')h=BZ();if(cs=='sum'){const g={};Object.assign(g,extraG());if(S.pf.has('biz'))g['Servicio ejecutivo']=bzLines();OP.filter(on).forEach(o=>(g[o.a]=g[o.a]||[]).push(o.l));
+  h='<div class="sum"><h2>Resumen para el hotel</h2><div class="mu">Perfil: '+([...S.pf].map(k=>PR.find(p=>p[0]==k)[1]).join(', ')||'—')+' · '+S.temp+'°C</div>'+Object.entries(g).map(([a,l])=>`<h3>${a}</h3><ul>${l.map(x=>'<li>'+x+'</li>').join('')}</ul>`).join('')+(S.notes?'<h3>Notas</h3><p>'+S.notes.replace(/</g,'&lt;')+'</p>':'')+'<input class="fld" placeholder="Tu nombre" value="'+S.name.replace(/"/g,'&quot;')+'" onchange="S.name=this.value"><input class="fld" value="'+S.hwa+'" onchange="S.hwa=this.value"><div class="mu">WhatsApp del hotel (con código de país)</div><button class="s" style="width:100%;margin-top:10px" onclick="copyJ(this)">Copiar JSON para operaciones</button></div>'}
+ b.innerHTML=h;document.getElementById('dots').innerHTML=SP().map((_,i)=>`<i class="${i<=S.step?'on':''}"></i>`).join('');
+ document.getElementById('bk').disabled=!S.step;const n=document.getElementById('nx');n.textContent=cs=='sum'?'Confirmar':'Siguiente';n.disabled=cs=='occ'&&!S.pf.size;hud();
+}
+function tp(k){S.pf.has(k)?S.pf.delete(k):S.pf.add(k);ui();build()}
+function to(k){const o=OP.find(x=>x.k==k);S.man[k]=!on(o);if(k=='twin'&&S.man.twin&&0)0;ui();build()}
+function go(d){if(SP()[S.step]=='sum'&&d>0){confirmWA();return}if(0){document.getElementById('body').innerHTML='<h2>✅ ¡Listo!</h2><p>Tu preferencia fue enviada al equipo del hotel. Prepararemos la habitación antes de tu llegada.</p>';return}S.step=Math.max(0,Math.min(SP().length-1,S.step+d));ui()}
+function copyJ(b){const j=JSON.stringify({perfil:[...S.pf],temperatura_c:S.temp,solicitudes:OP.filter(on).map(o=>({id:o.k,item:o.l,area:o.a})),notas:S.notes},null,1);(navigator.clipboard?navigator.clipboard.writeText(j):Promise.reject()).then(()=>b.textContent='Copiado ✓').catch(()=>{b.textContent='Copia no disponible aquí'})}
+function hud(){const h=document.getElementById('hud');h.innerHTML='<span>🌡 '+S.temp+'°C</span>'+(on(OP[9])?'<span>🔇 Zona tranquila</span>':'')+(on(OP[3])?'<span>🛏 Camas separadas</span>':'<span>🛏 King</span>')+'<span>'+OP.filter(on).length+' adaptaciones</span>'}
+
+/* ---------- 3D ---------- */
+const st=document.getElementById('stage'),R=new THREE.WebGLRenderer({antialias:true});R.shadowMap.enabled=true;R.setPixelRatio(Math.min(devicePixelRatio,2));st.prepend(R.domElement);
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,1,.1,50);
+const amb=new THREE.AmbientLight(0xffffff,.7),sun=new THREE.DirectionalLight(0xffffff,.6);sun.position.set(3,6,4);sun.castShadow=true;Object.assign(sun.shadow.camera,{left:-5,right:5,top:5,bottom:-5});sc.add(amb,sun);
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.8},o||{}));
+function bx(w,h,d,x,y,z,m,p){const e=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);e.position.set(x,y,z);e.castShadow=e.receiveShadow=true;(p||sc).add(e);return e}
+function cy(r,h,x,y,z,m,p,rz){const e=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,12),m);e.position.set(x,y,z);if(rz)e.rotation.z=Math.PI/2;p.add(e);return e}
+/* estática */
+bx(6,.1,5,0,-.05,0,M(0xc9a77c));bx(6,2.6,.1,0,1.3,-2.55,M(0xefe9df));
+const lw=bx(.1,2.6,5,-3.05,1.3,0,M(0xefe9df,{transparent:true,opacity:.45}));
+bx(1.8,.02,1.8,2.1,.01,-1.6,M(0xdfe7e6));bx(2.6,.02,1.6,-.6,.01,.2,M(0x7fa6a3));bx(.08,2.6,1,1.2,1.3,-2,M(0xefe9df));bx(.08,.6,.2,1.2,2.3,-1.1,M(0xefe9df));
+bx(.5,.4,.4,1.6,.2,-2.3,M(0xffffff));bx(.5,.1,.1,1.6,.55,-2.45,M(0xf4f4f4));
+bx(.6,.02,.6,2.7,.01,-2.2,M(0xc9d6d6));bx(.05,2,.7,2.15,1,-1.9,M(0x9ccfd8,{transparent:true,opacity:.35}));
+bx(1.4,1,.02,-.6,1.5,-2.48,M(0x9ad0ff,{emissive:0x335577}));
+const dyn=new THREE.Group();sc.add(dyn);let seen=new Set(),dl=new THREE.PointLight(0xffb060,0,3);sc.add(dl);
+function F(k,keys){const g=new THREE.Group();g.userData.k=k;keys.add(k);dyn.add(g);if(!seen.has(k)){g.scale.setScalar(.01);g.userData.grow=1}return g}
+function bed(g,cx,w,h){const wd=M(0x8a6a4a),ma=M(0xf7f7f7),bl=M(0x4f7f9a);
+ bx(w,.12,2.1,cx,h-.3,-1.4,wd,g);bx(w,.35,.1,cx,h+.1,-2.45,wd,g);
+ [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(a=>bx(.08,h-.35,.08,cx+a[0]*(w/2-.06),(h-.35)/2,-1.4+a[1]*1.0,wd,g));
+ bx(w-.06,.25,2,cx,h-.12,-1.4,ma,g);bx(w-.06,.06,1.2,cx,h+.04,-.9,bl,g);
+ const n=w>1.5?2:1;for(let i=0;i<n;i++)bx(.55,.12,.35,cx+(n==2?(i?.5:-.5):0),h+.1,-2.2,M(0xffffff),g)}
+function build(){
+ const keys=new Set(),o=k=>on(OP.find(x=>x.k==k));
+ dyn.clear();const twin=S.bed=='twin'||S.bed=='dbl2',h=(o('raised')||S.bed=='hosp')?.75:.45;let re;
+ const gb=F('bed:'+S.bed+h,keys);
+ {const L=BC[S.bed];L.forEach(b=>bed(gb,b[0],b[1],h));const q=L[L.length-1];re=q[0]+q[1]/2;if(S.bed=='twin')bx(.3,.45,.4,-.68,.22,-2.2,M(0x8a6a4a),gb);if(S.bed=='hosp'){const t=bx(.9,.1,.9,-.6,h+.2,-1.9,M(0xf7f7f7),gb);t.rotation.x=.5}}
+ if(o('pillows')){const g=F('pil',keys);[-.25,.25].forEach(x=>bx(.5,.16,.35,(twin?-1.3:-.6)+x,h+.2,-2.0,M(0xf2c14e),g))}
+ if(o('rails')){const g=F('rails',keys);bx(.04,.04,1.3,re+.02,h+.32,-1.0,M(0xb9c2c6),g);[-1.5,-.5].forEach(z=>bx(.04,.3,.04,re+.02,h+.17,z,M(0xb9c2c6),g))}
+ if(o('crib')){const g=F('crib',keys),m=M(0xe9d3b0);bx(.7,.05,1.2,-2.5,.35,-1.7,M(0xffffff),g);for(let i=0;i<8;i++){const z=-2.25+i*.15;bx(.02,.45,.02,-2.85,.6,z,m,g);bx(.02,.45,.02,-2.15,.6,z,m,g)}bx(.7,.03,.03,-2.5,.85,-2.28,m,g);bx(.7,.03,.03,-2.5,.85,-1.12,m,g);bx(.03,.03,1.2,-2.85,.85,-1.7,m,g);bx(.03,.03,1.2,-2.15,.85,-1.7,m,g)}
+ if(o('childproof')){const g=F('cp',keys);[[-1,-2.4],[1,-2.4],[-1,-.4],[1,-.4]].forEach(a=>bx(.1,.1,.1,(twin?-.65:-.6)+a[0]*(twin?1.0:1.0)*(twin?1.0:1.0),h-.3,a[1],M(0xff8a3d),g));bx(.08,.08,.02,2.9,.3,-1.0,M(0xff8a3d),g)}
+ if(o('sofa')){const g=F('sofa',keys),c=M(0x5b8a86);bx(.9,.4,1.8,-2.4,.3,1.0,c,g);bx(.2,.7,1.8,-2.8,.55,1.0,c,g);bx(.9,.12,.5,-2.4,.55,.5,M(0xf2f2f2),g)}
+ if(o('grab')){const g=F('grab',keys),m=M(0xc0c8cb,{metalness:.6,roughness:.3});cy(.025,.8,1.3,.9,-2.3,m,g);cy(.025,.7,2.6,1.0,-2.47,m,g,1);cy(.025,.6,2.15,.7,-2.2,m,g);bx(.5,.06,.4,2.7,.45,-2.2,M(0xffffff),g);bx(.05,.4,.05,2.9,.22,-2.2,m,g)}
+ if(o('nightlight')){const g=F('nl',keys),e=M(0xffcf80,{emissive:0xffa030,emissiveIntensity:S.night?2:.4});for(let x=re+.25;x<1.15;x+=.3)bx(.16,.02,.06,x,.02,-1.0,e,g);bx(1.6,.03,.04,twin?-.65:-.6,.12,-.3,e,g);bx(.12,.12,.04,1.15,.4,-1.04,e,g);dl.position.set(re+.4,.3,-1);dl.intensity=S.night?1.2:.3}else dl.intensity=0;
+ if(o('medical')){const g=F('med',keys);const r=new THREE.Mesh(new THREE.RingGeometry(.62,.75,40),new THREE.MeshBasicMaterial({color:0xff9f1c,side:2,transparent:true,opacity:.8}));r.rotation.x=-Math.PI/2;r.position.set(.8,.03,.35);g.add(r);
+  cy(.02,1.8,.62,.9,-.75,M(0xaab3b7),g);cy(.2,.03,.62,.02,-.75,M(0x777f82),g);bx(.14,.25,.06,.62,1.7,-.75,M(0xdbefff,{transparent:true,opacity:.8}),g);bx(.4,.5,.4,.75,.25,-.1,M(0xf2f2f2),g)}
+ if(o('quiet')){const g=F('qt',keys);[-1,-.2,.6,1.4].forEach(z=>bx(.05,1.1,.6,-2.98,1.4,z,M(0x2f8f83),g))}
+ if(o('desk')){const g=F('desk',keys),w=M(0x8a6a4a);bx(1.2,.05,.6,1.9,.75,1.8,w,g);[[-.55,-.25],[.55,-.25],[-.55,.25],[.55,.25]].forEach(a=>bx(.05,.75,.05,1.9+a[0],.37,1.8+a[1],w,g));bx(.35,.02,.25,1.9,.78,1.85,M(0x333a40),g);bx(.35,.22,.01,1.9,.9,1.7,M(0x1d2327,{emissive:0x335577}),g);bx(.4,.45,.4,1.9,.25,2.25,M(0x2d3a40),g)}
+ if(o('blackout')){const g=F('cur',keys);[-1.55,.35].forEach(x=>bx(.55,2.2,.08,x,1.3,-2.42,M(0x22304a),g))}
+ if(o('fridge')){const g=F('fr',keys);bx(.5,.6,.5,2.7,.3,.3,M(0xdfe5e8),g);bx(.03,.2,.03,2.44,.4,.3,M(0x888888),g)}
+ if(o('roses')){const g=F('rs',keys),c=twin?-1.3:-.6;for(let i=0;i<14;i++)bx(.1,.01,.07,c+Math.sin(i*2.1)*.5,h+.1,-1.0+Math.cos(i*1.7)*.4,M(0xc2185b),g);[[-2,-.4],[.65,-.4]].forEach(a=>cy(.04,.12,a[0],.06,a[1],M(0xfff1c9,{emissive:0xffb300,emissiveIntensity:.8}),g))}
+ if(o('o2')){const g=F('o2',keys);bx(.35,.5,.3,.7,.25,-2.2,M(0xe8f1f2),g);bx(.2,.03,.01,.7,.4,-2.04,M(0x2f8f83),g)}
+ if(o('pet')){const g=F('pet',keys);cy(.3,.1,2.0,.05,.2,M(0xb07d62),g);cy(.08,.04,1.6,.02,.5,M(0xcfd8dc),g)}
+ const W=M(0xffffff);
+ if(o('toddler')){const g=F('td',keys);bx(.7,.2,.9,-2.4,.2,-.5,M(0xf2c14e),g);bx(.7,.18,.04,-2.4,.4,-.95,M(0xe9d3b0),g)}
+ if(o('cot')){const g=F('cot',keys);bx(.8,.25,1.8,.2,.15,.9,M(0x6d8aa0),g);bx(.8,.08,.4,.2,.3,.2,W,g)}
+ if(o('tv')){const g=F('tv',keys);bx(1,.56,.04,.65,1.5,-2.47,M(0x0b0f12,{emissive:0x1b3a5a}),g)}
+ if(o('ac')){const g=F('ac',keys);bx(1,.28,.2,-2.3,2.25,-2.43,W,g);bx(.9,.03,.02,-2.3,2.15,-2.33,M(0x66ccff,{emissive:0x33aaff}),g)}
+ if(o('fan')){const g=F('fan',keys);cy(.02,.9,-1.5,.45,.6,M(0x555b60),g);const q=new THREE.Group();q.position.set(-1.5,.95,.6);q.userData.spin=1;g.add(q);bx(.4,.03,.05,0,0,0,M(0xb9c2c6),q);bx(.05,.03,.4,0,0,0,M(0xb9c2c6),q)}
+ if(o('hair')||o('iron')||o('flat')){const g=F('con'+o('hair')+o('iron')+o('flat'),keys);bx(.4,.7,.6,2.7,.35,1.1,M(0x8a6a4a),g);if(o('hair'))cy(.04,.18,2.7,.82,1.0,M(0xe58fb0),g,1);if(o('iron'))bx(.12,.06,.22,2.7,.76,1.2,M(0x99aab0),g);if(o('flat'))bx(.05,.02,.3,2.62,.74,.9,M(0x222222),g)}
+ if(o('wifi')){const g=F('wf',keys);bx(.2,.06,.12,.2,1.9,-2.45,W,g);bx(.03,.03,.03,.25,1.94,-2.38,M(0x22dd66,{emissive:0x22dd66}),g)}
+ if(o('gen')){const g=F('gen',keys);bx(.1,.15,.08,.15,.3,-2.47,M(0xffc107,{emissive:0x553300}),g)}
+ if(o('hotw')){const g=F('hw',keys);bx(.3,.5,.2,2.0,1.6,-2.45,M(0xe6edf0),g);bx(.04,.04,.02,2.0,1.4,-2.34,M(0xff7a00,{emissive:0xff5500}),g)}
+ if(o('lit_read')){const g=F('lr',keys);cy(.02,.5,re+.15,h+.3,-2.3,M(0x555b60),g);bx(.18,.1,.18,re+.15,h+.58,-2.3,M(0xfff1c9,{emissive:0xffcc66,emissiveIntensity:.9}),g)}
+ if(o('lit_makeup')){const g=F('lm',keys);bx(.6,.8,.02,1.9,1.5,-2.47,M(0xeaf6ff,{emissive:0xfff3d6,emissiveIntensity:.8}),g)}
+ if(o('cur2')){const g=F('c2',keys);[-1.55,.35].forEach(x=>bx(.55,2.2,.04,x,1.3,-2.36,M(0xffffff,{transparent:true,opacity:.5}),g))}
+ if(o('cur3')){const g=F('c3',keys);bx(2.2,.04,.04,-.6,2.45,-2.4,M(0x777777),g)}
+ seen=keys;tint()}
+function tint(){const t=(S.temp-18)/8;amb.color.setHSL(.58-.5*t,.35,.85);amb.intensity=S.night?.12:.7;sun.intensity=S.night?.05:.6;R.setClearColor(S.night?0x0d1214:0xcfd8d6)}
+function toggleNight(){S.night=!S.night;build()}
+/* cámara orbital */
+let th=.6,ph=1.05,rad=9;const home=[.6,1.05,9];
+function cp(){cam.position.set(rad*Math.sin(ph)*Math.sin(th),rad*Math.cos(ph),rad*Math.sin(ph)*Math.cos(th));cam.lookAt(0,.6,-.3)}
+function resetCam(){[th,ph,rad]=home}
+let dr=null;R.domElement.onpointerdown=e=>{dr=[e.clientX,e.clientY];R.domElement.setPointerCapture(e.pointerId)};
+R.domElement.onpointermove=e=>{if(!dr)return;th-=(e.clientX-dr[0])*.008;ph=Math.max(.3,Math.min(1.45,ph-(e.clientY-dr[1])*.006));dr=[e.clientX,e.clientY]};
+R.domElement.onpointerup=()=>dr=null;R.domElement.onwheel=e=>{e.preventDefault();rad=Math.max(4,Math.min(14,rad+e.deltaY*.01))};
+function rs(){const w=st.clientWidth,h=st.clientHeight;R.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(rs).observe(st);
+(function loop(){requestAnimationFrame(loop);dyn.children.forEach(g=>{if(g.userData.grow){const s=g.scale.x+(1-g.scale.x)*.18;g.scale.setScalar(s);if(s>.995){g.scale.setScalar(1);g.userData.grow=0}}});cp();R.render(sc,cam)})();
+/* ===== Ocasiones y requerimientos ===== */
+const NL=String.fromCharCode(10),HOTEL_WA='525500000000';
+PR.push(['romance','Romántico',''],['biz','Negocios',''],['celebrate','Celebración','']);
+const OC=[['honey','Luna de miel / aniversario','💍',['couple','romance']],['baby','Viaje con bebé o niños','🍼',['kids']],['reun','Reunión familiar multigeneracional','👪',['family','elder']],['senior','Escapada de abuelos','🌿',['elder']],['health','Acompaño a alguien en recuperación','🩺',['recovery']],['biz','Negocios / ejecutivo','💼',['biz']],['party','Cumpleaños o celebración','🎂',['celebrate']]];
+OP.push(
+{k:'lowfloor',l:'Piso bajo / cerca del elevador',a:'Recepción',p:['elder','recovery','kids']},
+{k:'towels',l:'Toallas extra',a:'Housekeeping',p:['family','kids','celebrate']},
+{k:'hypo',l:'Ropa de cama hipoalergénica',a:'Housekeeping',p:['kids','recovery']},
+{k:'diet',l:'Alimentos sin gluten, sin lactosa o vegano',a:'Alimentos',p:[]},
+{k:'fridge',l:'Minibar vacío para medicinas o leche',a:'Housekeeping',p:['kids','recovery']},
+{k:'blackout',l:'Cortinas blackout y antifaz',a:'Housekeeping',p:['biz','couple','kids']},
+{k:'desk',l:'Escritorio ergonómico, plancha y Wi‑Fi estable',a:'Mantenimiento',p:['biz']},
+{k:'late',l:'Salida tardía / llegada temprana',a:'Recepción',p:['biz','family']},
+{k:'roses',l:'Decoración romántica (pétalos y velas LED)',a:'Housekeeping',p:['romance'],r:1},
+{k:'cake',l:'Pastel o detalle de celebración',a:'Alimentos',p:['celebrate','romance'],r:1},
+{k:'o2',l:'Espacio y toma para concentrador de oxígeno',a:'Operaciones',p:['recovery'],r:1},
+{k:'visual',l:'Alertas visuales o vibratorias (timbre y alarma)',a:'Mantenimiento',p:[],r:1},
+{k:'sensory',l:'Kit sensorial de baja estimulación (TEA)',a:'Housekeeping',p:[],r:1},
+{k:'pet',l:'Cama y platos para mascota',a:'Housekeeping',p:[],r:1},
+{k:'prayer',l:'Tapete y orientación de oración',a:'Housekeeping',p:[],r:1},
+{k:'ownbed',l:'Firmeza de colchón o almohada especial',a:'Housekeeping',p:[],r:1});
+[['quiet','biz'],['quiet','romance'],['pillows','romance']].forEach(a=>OP.find(o=>o.k==a[0]).p.push(a[1]));
+const SP=()=>['occ','bed','opt','amen','conf'].concat(S.pf.has('biz')?['biz']:[],['sum']);
+const OCH=()=>'<h2>¿Cuál es la ocasión?</h2><div class="mu">Elige una o varias; adaptamos la habitación a cada una.</div>'+OC.map(c=>chip(`toc('${c[0]}')`,S.occ.has(c[0]),`<span style="font-size:22px">${c[2]}</span><b>${c[1]}</b>`)).join('');
+function toc(k){S.occ.has(k)?S.occ.delete(k):S.occ.add(k);S.pf=new Set(OC.filter(c=>S.occ.has(c[0])).flatMap(c=>c[3]));ui();build()}
+
+/* ===== Ejecutivos ===== */
+const BF=[['Continental','Pan dulce y tostadas, mantequilla, mermelada, jugo de naranja, fruta de temporada, yogur, café o té'],['Americano','Huevos al gusto, tocino, salchicha, papas hash brown, tostadas, jugo y café'],['Mexicano','Chilaquiles o huevos rancheros, frijoles refritos, tortillas, queso fresco, fruta, jugo y café'],['Ligero / fit','Avena con fruta, claras revueltas, aguacate, pan integral, yogur griego y té verde'],['Vegano','Tofu revuelto, aguacate, pan de masa madre, fruta, granola con leche de almendra y café'],['Sin gluten','Huevos, fruta, yogur, pan sin gluten, quinoa, jugo natural y café'],['Infantil','Hotcakes pequeños, fruta en trozos, cereal, leche o chocolate caliente y jugo'],['Japonés','Arroz, sopa miso, salmón a la plancha, tamagoyaki, encurtidos y té verde'],['Para llevar','Sándwich de huevo y queso, fruta, barra de granola, jugo y café en vaso térmico'],['Sin desayuno','']];
+function BZ(){return '<h2>Servicio ejecutivo</h2><div class="mu">Desayuno y vestuario listos antes de tu reunión.</div><h2 style="font-size:14px">Hora del desayuno ejecutivo</h2>'+`<label class="mu">Hora<input type="time" class="fld" value="${S.bft}" onchange="S.bft=this.value"></label><h2 style="font-size:14px">Vestuario</h2>`+chip('S.rent=!S.rent;ui()',S.rent,'<span style="font-size:20px">🤵</span><b>Alquilar traje para mi reunión o evento</b>')+(S.rent?'<button class="p" style="width:100%" onclick="openSuit()">Diseñar mi traje en 3D</button>':'')}
+function bzLines(){const a=['Desayuno ejecutivo: '+S.bf+' a las '+S.bft];if(S.rent){const c=CB[X.c];a.push('Alquiler de traje '+SC[X.c][0]+', talla '+Math.round(Z.ch/4)*2+', camisa '+c[0][X.s][0]+', corbata '+c[1][X.t][0]+', pantalón '+(X.p?c[2][0]:'a juego'),'Medidas (cm): estatura '+Z.h+', cuello '+Z.ne+', hombros '+Z.sh+', pecho '+Z.ch+', cintura '+Z.wa+', cadera '+Z.hi+', manga '+Z.sl+', entrepierna '+Z.in)}return a}
+
+/* ===== Traje 3D ===== */
+const SC={navy:['Azul marino',0x1b2a4a],char:['Gris carbón',0x3a3f45],black:['Negro',0x16181b],pearl:['Gris perla',0x9aa3ab],blue:['Azul medio',0x2f5d9b],brown:['Café',0x6b4a32]};
+const CB={navy:[[['Blanca',0xffffff],['Celeste',0xb9d6f0]],[['Borgoña',0x7a1f2e],['Plata',0xbfc5cc],['Azul cielo',0x4f86c6]],['Gris carbón',0x3a3f45]],
+char:[[['Blanca',0xffffff],['Azul cielo',0xb9d6f0]],[['Azul marino',0x1b2a4a],['Borgoña',0x7a1f2e],['Plata',0xbfc5cc]],['Azul marino',0x1b2a4a]],
+black:[[['Blanca',0xffffff],['Gris perla',0xdfe3e6]],[['Negra',0x111111],['Plata',0xbfc5cc],['Rojo oscuro',0x8b1a1a]],['Gris carbón',0x3a3f45]],
+pearl:[[['Blanca',0xffffff],['Rosa pálido',0xf3d6dc]],[['Azul marino',0x1b2a4a],['Vino',0x6e1e3a]],['Azul marino',0x1b2a4a]],
+blue:[[['Blanca',0xffffff],['Celeste',0xcfe3f5]],[['Gris',0x6c737a],['Azul marino',0x1b2a4a]],['Gris carbón',0x3a3f45]],
+brown:[[['Crema',0xf3ead6],['Celeste',0xcfe3f5]],[['Verde olivo',0x5b6b2f],['Naranja quemado',0xb5622a]],['Gris carbón',0x3a3f45]]};
+const Z={h:178,ne:39,sh:46,ch:98,wa:84,hi:100,sl:64,in:80},ZL=[['h','Estatura'],['ne','Cuello'],['sh','Hombros'],['ch','Pecho'],['wa','Cintura'],['hi','Cadera'],['sl','Manga'],['in','Entrepierna']],X={c:'navy',s:0,t:0,p:0,tut:0,hl:0};
+const hx=n=>'#'+n.toString(16).padStart(6,'0');
+const TS=[['Estatura','Descalzo y de espalda a la pared. Marca la altura de la cabeza y mide hasta el piso.'],['Cuello','Cinta bajo la nuez, con un dedo de holgura.'],['Hombros','De punta a punta del hombro por la espalda, sin tensar.'],['Pecho','Bajo las axilas, en la parte más ancha, brazos relajados y cinta horizontal.'],['Cintura','En la parte más estrecha, sobre el ombligo. No metas el abdomen.'],['Cadera','Alrededor de la parte más ancha de los glúteos.'],['Manga','Del hueso del hombro a la muñeca, con el brazo ligeramente doblado.'],['Entrepierna','De la entrepierna al tobillo, pegado a la pierna y descalzo.']];
+const TL=[[12,10,12,250],[50,40,70,40],[30,50,90,50],[32,72,88,72],[36,108,84,108],[33,134,87,134],[92,52,104,140],[60,150,60,246]];
+function TU(){return '<button class="s" style="flex:0;padding:6px 12px" onclick="X.tut=0;rc()">← Volver</button><h2>Cómo medirte</h2><div class="mu">Usa cinta flexible, ropa ligera y pide ayuda a otra persona. La cinta debe quedar firme, sin apretar.</div><div class="tut"><svg viewBox="0 0 120 260"><circle cx="60" cy="22" r="14" fill="var(--ln)"/><rect x="32" y="45" width="56" height="95" rx="14" fill="var(--ln)"/><rect x="38" y="138" width="20" height="108" rx="8" fill="var(--ln)"/><rect x="62" y="138" width="20" height="108" rx="8" fill="var(--ln)"/><rect x="20" y="48" width="10" height="92" rx="5" fill="var(--ln)"/><rect x="90" y="48" width="10" height="92" rx="5" fill="var(--ln)"/>'+TL.map((l,i)=>`<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}" stroke="${X.hl==i?'#e11d48':'var(--mu)'}" stroke-width="${X.hl==i?3.5:1.5}" stroke-dasharray="${X.hl==i?0:'4 3'}"/>`).join('')+'</svg><div>'+TS.map((t,i)=>`<div class="st ${X.hl==i?'on':''}" onclick="X.hl=${i};rc()"><b>${i+1}. ${t[0]}</b>${X.hl==i?t[1]:''}</div>`).join('')+'</div></div>'}
+const pick=(a,k)=>a.map((c,i)=>`<button class="pill ${X[k]==i?'on':''}" onclick="X.${k}=${i};rc();mk()"><i style="background:${hx(c[1])}"></i>${c[0]}</button>`).join('');
+function rc(){const cb=CB[X.c];document.getElementById('sc').innerHTML=X.tut?TU():`<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Diseña tu traje</h2><button class="s" style="flex:0;padding:6px 12px" onclick="closeSuit()">✕</button></div><div class="mu">Medidas en cm · <a href="#" onclick="X.tut=1;rc();return false" style="color:var(--ac)">¿Cómo medirme?</a></div><div class="grid2">${ZL.map(l=>`<label class="mu">${l[1]}<input type="number" value="${Z[l[0]]}" oninput="Z.${l[0]}=+this.value||0;mk();sz()"></label>`).join('')}</div><div id="sz" class="szb"></div><h2 style="font-size:14px">Color del traje</h2><div class="sw">${Object.keys(SC).map(k=>`<button class="${X.c==k?'on':''}" title="${SC[k][0]}" style="background:${hx(SC[k][1])}" onclick="X.c='${k}';X.s=0;X.t=0;rc();mk()"></button>`).join('')}</div><div class="mu">${SC[X.c][0]} · combinaciones sugeridas</div><div class="mu" style="margin-top:6px">Camisa</div>${pick(cb[0],'s')}<div class="mu">Corbata</div>${pick(cb[1],'t')}<div class="mu">Pantalón</div><button class="pill ${X.p?'':'on'}" onclick="X.p=0;rc();mk()">A juego</button><button class="pill ${X.p?'on':''}" onclick="X.p=1;rc();mk()"><i style="background:${hx(cb[2][1])}"></i>Contraste ${cb[2][0]}</button><button class="p" style="width:100%;margin-top:12px" onclick="closeSuit()">Guardar traje</button>`;sz()}
+function sz(){const e=document.getElementById('sz');if(!e)return;e.innerHTML='Talla sugerida: <b>'+Math.round(Z.ch/4)*2+' '+(Z.h>=185?'Long':Z.h<=170?'Short':'Regular')+'</b> · Pantalón ≈ <b>'+Math.round(Z.wa/2.54)+'"</b> · largo '+Z.in+' cm (aproximado; el sastre confirma)'}
+let mg,s2,c2,r2,th2=0,svOK=0;
+function mk(){if(!mg)return;mg.clear();const H=Z.h/100,iN=Z.in/100,shY=H-.3,Lt=Math.max(.4,shY-iN),cb=CB[X.c],js=M(SC[X.c][1]),pc=M(X.p?cb[2][1]:SC[X.c][1]),sk=M(0xd9a47e),rc_=Z.ch/628*1.12,rw=Z.wa/628*1.05,rh=Z.hi/628*1.05;
+ const A=(g,m,x,y,z,sx,sz)=>{const e=new THREE.Mesh(g,m);e.position.set(x,y,z);if(sx)e.scale.set(sx,1,sz);e.castShadow=true;mg.add(e);return e},CY=THREE.CylinderGeometry;
+ [-1,1].forEach(s=>{A(new CY(rh*.46,rh*.34,iN,16),pc,s*rh*.42,iN/2,0);A(new THREE.BoxGeometry(.1,.06,.26),M(0x111111),s*rh*.42,.03,.05)});
+ A(new CY(rc_,rw,Lt,24),M(cb[0][X.s][1]),0,iN+Lt/2,0,1,.72);
+ A(new CY(rc_+.018,rh+.018,Lt+.2,24),js,0,iN+Lt/2-.1,0,1,.76);
+ const fz=(rc_+.02)*.76+.003;A(new THREE.BoxGeometry(.1,.34,.01),M(cb[0][X.s][1]),0,shY-.2,fz);A(new THREE.BoxGeometry(.045,.3,.012),M(cb[1][X.t][1]),0,shY-.24,fz+.006);
+ [-1,1].forEach(s=>{const sx=Z.sh/200;A(new CY(.05,.04,Z.sl/100,12),js,s*(sx+.04),shY-.05-Z.sl/200,0);A(new THREE.SphereGeometry(.04,10,8),sk,s*(sx+.04),shY-.05-Z.sl/100-.03,0)});
+ A(new CY(Z.ne/628,Z.ne/628,.1,14),sk,0,shY+.04,0);A(new THREE.SphereGeometry(.11,20,16),sk,0,H-.11,0);A(new THREE.SphereGeometry(.115,20,16,0,6.28,0,1.5),M(0x2b2118),0,H-.1,-.01)}
+function initSV(){svOK=1;const v=document.getElementById('sv');r2=new THREE.WebGLRenderer({antialias:true});r2.setClearColor(0xcfdcda);r2.shadowMap.enabled=true;r2.setPixelRatio(Math.min(devicePixelRatio,2));v.append(r2.domElement);s2=new THREE.Scene();c2=new THREE.PerspectiveCamera(35,1,.1,30);mg=new THREE.Group();s2.add(mg,new THREE.AmbientLight(0xffffff,.8));const d=new THREE.DirectionalLight(0xffffff,.8);d.position.set(2,4,3);d.castShadow=true;s2.add(d);const g=new THREE.Mesh(new THREE.CircleGeometry(1,40),M(0xe8eeee));g.rotation.x=-Math.PI/2;g.receiveShadow=true;s2.add(g);
+ let dr=null;const cv=r2.domElement;cv.style.touchAction='none';cv.onpointerdown=e=>{dr=e.clientX;cv.setPointerCapture(e.pointerId)};cv.onpointermove=e=>{if(dr!=null){th2-=(e.clientX-dr)*.01;dr=e.clientX}};cv.onpointerup=()=>dr=null;
+ new ResizeObserver(()=>{r2.setSize(v.clientWidth,v.clientHeight);c2.aspect=v.clientWidth/v.clientHeight;c2.updateProjectionMatrix()}).observe(v);
+ (function l(){requestAnimationFrame(l);if(document.getElementById('suitm').style.display!='flex')return;if(dr==null)th2+=.004;const H=Z.h/100;c2.position.set(Math.sin(th2)*3.6,H*.6,Math.cos(th2)*3.6);c2.lookAt(0,H*.5,0);r2.render(s2,c2)})()}
+function openSuit(){document.getElementById('suitm').style.display='flex';if(!svOK)initSV();X.tut=0;rc();mk()}
+function closeSuit(){document.getElementById('suitm').style.display='none';ui()}
+
+/* ===== Confirmación por WhatsApp ===== */
+function waMsg(){const g={};OP.filter(on).forEach(o=>(g[o.a]=g[o.a]||[]).push(o.l));Object.assign(g,extraG());if(S.pf.has('biz'))g['Servicio ejecutivo']=bzLines();
+ return 'Hola, soy '+(S.name||'huésped')+'. Confirmo mi hospedaje. Requerimientos especiales:'+NL+Object.keys(g).map(a=>NL+'*'+a+'*'+NL+g[a].map(x=>'• '+x).join(NL)).join(NL)+NL+NL+'Temperatura: '+S.temp+'°C'+(S.notes?NL+'Notas: '+S.notes:'')}
+function confirmWA(){const m=waMsg(),u='https://wa.me/'+S.hwa.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(m);document.getElementById('body').innerHTML='<h2>✅ Hospedaje confirmado</h2><p>Envía tus requerimientos al WhatsApp del hotel con un toque:</p><a class="chip on" style="justify-content:center;text-decoration:none;color:inherit" target="_blank" rel="noopener" href="'+u+'"><b>💬 Abrir WhatsApp con mi mensaje</b></a><pre class="mu" style="white-space:pre-wrap;font-family:inherit">'+m.replace(/</g,'&lt;')+'</pre>'}
+
+/* ===== Ampliación v3 ===== */
+const TN={wed:'Boda',preg:'Embarazo',solo:'Viaje solo',friends:'Amigos',long:'Estancia larga',sport:'Deporte',mobility:'Movilidad reducida',sens:'Sensorial',pets:'Mascota',faith:'Retiro espiritual',grief:'Duelo',transit:'Tránsito',teen:'Adolescentes',creator:'Contenido'};
+Object.keys(TN).forEach(t=>PR.push([t,TN[t],'']));
+OC.push(['wed','Boda (novios o invitados)','👰',['romance','celebrate','wed']],['babymoon','Embarazo / babymoon','🤰',['couple','preg']],['solo','Viaje en solitario','🧳',['solo']],['friends','Escapada con amigos','🥂',['friends']],['bach','Despedida de soltero(a)','🎉',['friends','celebrate']],['conf','Congreso o conferencia','🎤',['biz']],['remote','Trabajo remoto (workation)','💻',['biz','long']],['sport','Evento deportivo o equipo','🏃',['sport']],['grad','Graduación','🎓',['celebrate','family']],['wheel','Movilidad reducida / silla de ruedas','♿',['mobility','elder']],['sens','Sordera, TEA o sensibilidad sensorial','🧩',['sens']],['pets','Viajo con mascota','🐕',['pets']],['med','Turismo médico / tratamiento','🏥',['recovery','long']],['faith','Retiro o peregrinación','🕊️',['faith']],['grief','Duelo o evento fúnebre','🕯️',['grief']],['long','Estancia larga o reubicación','📦',['long']],['transit','Escala o llegada de madrugada','🛬',['transit']],['teen','Familia con adolescentes','🎮',['family','teen']],['creator','Sesión de fotos o contenido','📸',['creator']],['concert','Concierto o festival','🎶',['friends','transit']]);
+OP.push(
+{k:'toddler',l:'Camita infantil baja',a:'Housekeeping',p:['kids']},
+{k:'cot',l:'Cama plegable extra',a:'Housekeeping',p:['family','friends','teen']},
+{k:'hair',l:'Secador de pelo',a:'Housekeeping',p:['romance','celebrate','wed','solo','friends','biz','creator'],g:'amen',s:'e'},
+{k:'iron',l:'Plancha para ropa y tabla',a:'Housekeeping',p:['biz','wed','grad','grief'],g:'amen',s:'e'},
+{k:'flat',l:'Plancha de pelo',a:'Housekeeping',p:['celebrate','wed','friends','creator','teen'],g:'amen',s:'e'},
+{k:'fan',l:'Ventilador',a:'Mantenimiento',p:['preg','sport','long'],g:'amen',s:'e'},
+{k:'ac',l:'Aire acondicionado',a:'Mantenimiento',p:['preg','recovery','elder','kids','sport'],g:'amen',s:'e'},
+{k:'tv',l:'Smart TV (streaming)',a:'Mantenimiento',p:['kids','teen','long','solo','friends'],g:'amen',s:'e'},
+{k:'wifi',l:'Wi‑Fi de alta velocidad (videollamadas)',a:'Sistemas',p:['biz','long','creator','teen'],g:'amen',s:'e'},
+{k:'gen',l:'Respaldo de planta eléctrica',a:'Mantenimiento',p:['recovery','mobility'],g:'amen',s:'e'},
+{k:'hotw',l:'Agua caliente garantizada',a:'Mantenimiento',p:['kids','elder','recovery','preg'],g:'amen',s:'e'},
+{k:'cur2',l:'Cortinas translúcidas (luz suave)',a:'Housekeeping',p:[],g:'amen',s:'c'},
+{k:'cur3',l:'Cortinas motorizadas',a:'Mantenimiento',p:[],g:'amen',s:'c',r:1},
+{k:'lit_warm',l:'Luz cálida y relajante',a:'Mantenimiento',p:['romance','couple','preg','grief'],g:'amen',s:'l'},
+{k:'lit_cool',l:'Luz fría y brillante para trabajar',a:'Mantenimiento',p:['biz','long','creator'],g:'amen',s:'l'},
+{k:'lit_dim',l:'Luz regulable (dimmer)',a:'Mantenimiento',p:['romance','elder','sens'],g:'amen',s:'l'},
+{k:'lit_read',l:'Lámpara de lectura junto a la cama',a:'Mantenimiento',p:['elder','solo','long'],g:'amen',s:'l'},
+{k:'lit_makeup',l:'Espejo con luz (maquillaje o fotos)',a:'Mantenimiento',p:['wed','creator','celebrate','friends'],g:'amen',s:'l'},
+{k:'lit_amber',l:'Luz ámbar sin parpadeo',a:'Mantenimiento',p:['sens'],g:'amen',s:'l',r:1});
+const AD={quiet:['preg','solo','faith','grief','transit','sens','long'],blackout:['transit','long','sport','preg'],pillows:['preg','sport'],lowfloor:['mobility','preg'],grab:['mobility'],rails:['mobility'],medical:['mobility'],raised:['mobility','preg'],nightlight:['preg','mobility','sens'],late:['transit','grief','sport','long','wed'],cake:['wed','grad','friends'],towels:['pets','sport','friends','teen'],fridge:['preg','long','sport'],diet:['preg','sport','faith','sens'],desk:['long','creator'],visual:['sens'],sensory:['sens'],pet:['pets'],prayer:['faith'],ownbed:['sport','preg','long']};
+Object.keys(AD).forEach(k=>OP.find(o=>o.k==k).p.push(...AD[k]));
+['crib','sofa','raised','rails','pillows','ownbed'].forEach(k=>OP.find(o=>o.k==k).g='bed');
+Object.assign(OP.find(o=>o.k=='blackout'),{g:'amen',s:'c'});Object.assign(OP.find(o=>o.k=='twin'),{h:1,p:[],l:''});
+const CO=o=>chip("to('"+o.k+"')",on(o),'<b>'+o.l+'</b>',sug(o)?'<span class="tag">Sugerido</span>':o.r?'<span class="tag" style="color:var(--mu)">Poco común</span>':'');
+const ok=k=>on(OP.find(o=>o.k==k));
+
+/* Camas */
+const BL={king:'King',queen:'Queen',twin:'2 individuales',dbl2:'2 matrimoniales',single:'1 individual',hosp:'Articulada (tipo hospital)'};
+const BD={king:'2,00 m · parejas y máximo confort',queen:'1,60 m · 1 o 2 personas',twin:'Dos camas de 0,95 m · amigos, familia o abuelos',dbl2:'Dos camas matrimoniales · familias con niños',single:'Una cama individual · viaje en solitario',hosp:'Cama alta con respaldo elevable · recuperación o movilidad reducida'};
+const SB={hosp:['recovery','mobility'],dbl2:['kids','teen'],twin:['elder','friends','family','sport'],queen:['biz','long','creator'],king:['couple','romance','wed','preg'],single:['solo']};
+const BC={king:[[-.6,2]],queen:[[-.6,1.6]],twin:[[-1.3,.95],[-.05,.95]],dbl2:[[-1.4,1.35],[0,1.35]],single:[[-.6,.95]],hosp:[[-.6,.95]]};
+S.bed='king';S.firm='Media';S.pil='Sin preferencia';
+const sg=k=>SB[k].some(t=>S.pf.has(t));
+const BEDH=()=>'<h2>Camas</h2><div class="mu">Elige la distribución principal.</div>'+Object.keys(BL).map(k=>chip("sb('"+k+"')",S.bed==k,'<span><b>'+BL[k]+'</b><div class="mu">'+BD[k]+'</div></span>',sg(k)?'<span class="tag">Sugerido</span>':'')).join('')+'<h2 style="font-size:14px">Colchón</h2>'+['Suave','Media','Firme','Sin preferencia'].map(x=>`<button class="pill ${S.firm==x?'on':''}" onclick="S.firm='${x}';ui()">${x}</button>`).join('')+'<h2 style="font-size:14px">Almohada</h2>'+['Plumas','Memory foam','Hipoalergénica','Cervical','Sin preferencia'].map(x=>`<button class="pill ${S.pil==x?'on':''}" onclick="S.pil='${x}';ui()">${x}</button>`).join('')+'<h2 style="font-size:14px">Extras de dormir</h2>'+OP.filter(o=>o.g=='bed').map(CO).join('');
+function sb(k){S.bed=k;S.bm=1;ui();build()}
+function toc(k){S.occ.has(k)?S.occ.delete(k):S.occ.add(k);S.pf=new Set(OC.filter(c=>S.occ.has(c[0])).flatMap(c=>c[3]));if(!S.bm)S.bed=['hosp','dbl2','twin','queen','king','single'].find(sg)||'king';ui();build()}
+/* Equipos, cortinas, iluminación */
+const AMH=()=>{const L=(t,s)=>'<h2 style="font-size:14px">'+t+'</h2>'+OP.filter(o=>o.g=='amen'&&o.s==s).map(CO).join('');return '<h2>Equipos y ambiente</h2><div class="mu">Marca lo que necesitas en la habitación.</div>'+L('Equipos y servicios','e')+L('Cortinas','c')+L('Iluminación','l')};
+/* Desayunos con ingredientes */
+const BFH=()=>'<h2>Desayuno</h2><div class="mu">Cada opción muestra sus ingredientes. Indica alergias en las notas.</div>'+BF.map(b=>chip("S.bf='"+b[0]+"';ui()",S.bf==b[0],'<span><b>'+b[0]+'</b>'+(b[1]?'<div class="mu">'+b[1]+'</div>':'')+'</span>')).join('');
+function extraG(){const r={Camas:[BL[S.bed],'Colchón: '+S.firm,'Almohada: '+S.pil]},b=BF.find(x=>x[0]==S.bf);if(b&&b[1])r.Desayuno=[S.bf+' ('+b[1]+')'];return r}
+function hud(){const h=document.getElementById('hud'),b=[];b.push('🌡 '+S.temp+'°C','🛏 '+BL[S.bed]);if(ok('quiet'))b.push('🔇 Zona tranquila');if(ok('ac'))b.push('❄ A/C');if(ok('wifi'))b.push('📶 Wi‑Fi');if(ok('gen'))b.push('⚡ Respaldo');if(ok('hotw'))b.push('♨ Agua caliente');b.push(OP.filter(on).length+' adaptaciones');h.innerHTML=b.map(x=>'<span>'+x+'</span>').join('')}
+function tint(){const t=(S.temp-18)/8,d=ok('lit_dim');let hu=.58-.5*t,sa=.35;if(ok('lit_warm')){hu=.09;sa=.6}if(ok('lit_cool')){hu=.58;sa=.25}amb.color.setHSL(hu,sa,.85);amb.intensity=S.night?.12:(d?.45:.7);sun.intensity=S.night?.05:(d?.35:.6);R.setClearColor(S.night?0x0d1214:0xcfd8dc)}
+(function sp(){requestAnimationFrame(sp);dyn.traverse(e=>{if(e.userData.spin)e.rotation.y+=.35})})();
+
+ui();build();rs();
+</script>
+</body>
+</html>
